@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="jquery/jquery-1.9.1.js"></script>
+    <script>
+        var timer=null;
+        var count=0;
+        $(function () {
+            //克隆第一个li添加到ullist中，为了防止出现闪动（从最后一张到第一张）
+            $(".ullist>li:first").clone().appendTo($(".ullist"));
+            showanimate();
+           //鼠标进入图片，动画停止
+            $(".block").hover(function(){
+                clearInterval(timer);
+            },function(){
+                showanimate();
+            })
+            function showanimate(){
+               timer= setInterval(function(){
+                    animateinfo();//调用图片滚动动画
+                },1300);
+            }
+        //创建点
+           var parstr=$("<div class='dianbanner'></div>");
+             for(var i=0;i<$(".ullist>li").length-1;i++){
+             var str=$("<div class='dian'></div>");
+             parstr.append(str);
+             }
+             $(".block").append(parstr);
+        //默认第一个点为红色
+            $(".dian").eq(0).css("backgroundColor","red");
+            //鼠标进入点，当前点变红，并且相对应的图片也切出来
+            $(".dian").each(function(index){
+                $(this).bind("mouseenter",function(){
+                    $(".ullist").animate({
+                        marginLeft:(-800*index)+"px"
+                    },700,"linear");
+                    $(this).prevAll().css("backgroundColor","");
+                    $(this).nextAll().css("backgroundColor","");
+                    $(this).css("backgroundColor","red")
+                    count=index;
+                })
+            });
+            //点击鼠标箭头，左右滑动
+            var lor=$("<div class='lor'></div>")
+            var ljian=$("<div  class='ljian'><</div>");
+            lor.append(ljian)
+            var rjian=$("<div class='rjian'>></div>")
+            lor.append(rjian);
+            $(".block").append(lor);
+            //鼠标点击箭头滑动
+      $(".ljian").click(function(){
+                animateinfo()
+            });
+            $(".rjian").click(function(){
+                    $(".dian").eq(count).css("backgroundColor","");
+                    count--;//图片滚动动画
+                    //图片混动，点随之变红，之前的点变透明
+                    $(".dian").eq(count==6?0:count).css("backgroundColor","red");
+                    if(count<0){
+                        count=$(".ullist>li").length-2;
+                        $(".ullist").css("marginLeft","-4800px")
+                    }
+                    $(".ullist").animate({
+                        marginLeft:(-800*count)+"px"
+                    },700,"linear")
+                    })
+            function animateinfo() {
+                $(".dian").eq(count).css("backgroundColor", "");
+                count++;//图片滚动动画
+                //图片混动，点随之变红，之前的点变透明
+                $(".dian").eq(count == 6 ? 0 : count).css("backgroundColor", "red");
+                $(".ullist").animate({
+                    marginLeft: (-800 * count) + "px"
+                }, 700, "linear", function () {//当count值大于图片个数，让count变为0，marginLeft也变为0
+                    if (count >= $(this).children().length - 1) {
+                        count = 0;
+                        $(this).css("marginLeft", "0px")
+                    }
+                })
+            }
+            })
+    </script>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .block{
+            position: relative;
+            margin: 0 auto;
+            width: 800px;
+            height: 350px;
+            border: 1px solid silver;
+            overflow: hidden;
+        }
+        .ullist{
+            width: 5600px;
+            height: 350px;
+        }
+        .ullist>li{
+            list-style: none;
+            float: left;
+        }
+        img{
+            vertical-align: middle;
+            width: 800px;
+            height: 350px;
+        }
+        .dianbanner{
+            position: absolute;
+            width: 120px;
+            left: 320px;
+            bottom: 5px;
+        }
+        .dian{
+            width: 10px;
+            height: 10px;
+            border: 1px solid silver;
+            float: left;
+            margin: 0 3px;
+        }
+        .lor{
+            position: absolute;
+            width: 800px;
+            left: 0;
+            top: 140px;
+        }
+        .ljian{
+            display: inline-block;
+            font-size: 60px;
+            color: white;
+            float: left;
+            cursor: pointer;
+        }
+        .rjian{
+            display: inline-block;
+            font-size: 60px;
+            color: white;
+            float: right;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="block">
+    <ul class="ullist">
+        <li><img src="./img/demo1.jpg" alt=""/> </li>
+        <li><img src="./img/demo2.jpg" alt=""/> </li>
+        <li><img src="./img/demo3.jpg" alt=""/> </li>
+        <li><img src="./img/demo4.jpg" alt=""/> </li>
+        <li><img src="./img/demo5.jpg" alt=""/> </li>
+        <li><img src="./img/demo6.jpg" alt=""/> </li>
+    </ul>
+</div>
+</body>
+</html>

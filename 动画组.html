@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="jquery/jquery-1.9.1.js"></script>
+    <style>
+        .block{
+            width: 900px;
+            height: 450px;
+            border: 1px solid silver;
+            margin: 0 auto;
+            position: relative;
+        }
+        .block img{
+            width: 900px;
+            height: 450px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+<div class="block">
+    <img src="./img/demo1.jpg" alt=""/>
+    <img src="./img/demo2.jpg" alt=""/>
+    <img src="./img/demo4.jpg" alt=""/>
+    <img src="./img/demo3.jpg" alt=""/>
+    <img src="./img/demo5.jpg" alt=""/>
+    <img src="./img/demo6.jpg" alt=""/>
+    <div class="par"></div>
+</div>
+<script>
+    $(function()
+    {
+        //设置动画中所需要的相关变量
+        var options={
+            width:900,
+            height:450,
+            gridCol:10,
+            gridRow:5,
+            gridHorizontal:10,
+            gridVertical:20,
+            speed:2000,
+            elment:null,
+            effects:["centerbig","Hanimate","Vanimate"],
+            src:null
+        }
+        //产生三组不同的dom元素（小方格，横条纹，竖条纹）
+        var stage=[[],[],[]];
+        //画方格铺满整张图片
+        for(var i=0;i<options.gridCol*options.gridRow;i++)//遍历创建小方格
+        {//创建div元素
+            var cr=$("<div></div>");
+            cr.css({//设置方块样式
+                width:options.width/options.gridCol,
+                height:options.height/options.gridRow,
+                position:"absolute",
+                zIndex:10,
+                left:(i%options.gridCol)*(options.width/options.gridCol),
+                top:Math.floor(i/options.gridCol)*(options.height/options.gridRow),
+                //设置样式的宽高
+                backgroundSize:options.width+"px "+options.height+"px",
+                //设置背景坐标
+                backgroundPosition:(-(i % options.gridCol) * (options.width / options.gridCol))+"px "+(-Math.floor(i / options.gridCol) * (options.height / options.gridRow))+"px",
+              /*  border:"1px solid red"*/
+            })
+            stage[0].push(cr);
+            /*stage[0].forEach(function(el){
+             $(".block").append(el);
+             })*/
+        }
+        //横条纹
+        for(var i=0;i<options.gridHorizontal;i++){
+            var hr=$("<div></div>");
+            hr.css({
+                width:options.width,
+                height:options.height/options.gridHorizontal,
+                position:"absolute",
+                zIndex:10,
+                left:0,
+                top:Math.floor(i*options.height/options.gridHorizontal),
+                backgroundSize:options.width+"px "+options.height+"px",
+                backgroundPosition:"0px "+(-Math.floor(i*options.height/options.gridHorizontal))+"px",
+                /*border:"1px solid red"*/
+            })
+            stage[1].push(hr);
+            /*stage[1].forEach(function(el){
+             $(".block").append(el);
+             })*/
+        }
+        //垂直条纹
+        for(var i=0;i<options.gridVertical;i++) {
+            var hr = $("<div></div>");
+            hr.css({
+                width: options.width / options.gridVertical,
+                height: options.height,
+                position: "absolute",
+                zIndex: 10,
+                left: i * (options.width / options.gridVertical),
+                top: 0,
+                backgroundSize:options.width+"px "+options.height+"px",
+                backgroundPosition:(-Math.floor(i*options.height/options.gridHorizontal))+"px "+"0px",
+              /*  border: "1px solid red",*/
+            })
+            stage[2].push(hr);
+            /* stage[2].forEach(function(el){
+             $(".block").append(el);
+             })*/
+        }
+        //图片排序
+        $(".block").each(function(){
+            options.elment=$(this)//为了使下面淡入淡出拿到图片的层将this付给elment
+        }).children("img").each(function(index){
+            if(index!=0){//让索引为0的图片显示
+                $(this).css("dispaly","none");
+            }
+            $(this).css({
+                zIndex:$(".block img").length-index-1,
+            })
+        })
+        //基本效果淡入淡出
+        //当图片在第六层时，图片淡出，并将层调至0，当层在第五层时，图片淡入，层加1
+        var effects={
+           fade:function (){
+                options.elment.children("img").each(function(index){
+                    $(this).css("zIndex",parseInt($(this).css("zIndex"))+1);
+                    if($(this).css("zIndex")==6){
+                        $(this).css("zIndex",0).fadeOut(options.speed/2);
+                    }
+                    else if($(this).css("zIndex")==5){
+                        $(this).fadeIn(options.speed/2);
+                        options.src=$(this).attr("src");//将图片的地址给options.src
+                    }
+                })
+            },
+            //写小方格动画
+            //首先写默认状态的css样式，再写动画的过程
+            centerbig: function () {
+                stage[0].forEach(function (el,i){
+                    el.each(function () {
+                        $(this).css({
+                            width: 0,
+                            height: 0,
+                            left: (options.width / options.gridCol) / 2 + (i % options.gridCol) * (options.width / options.gridCol),
+                            top: Math.floor(i / options.gridCol) * (options.height / options.gridRow) +(options.height / options.gridRow)/2,
+                            backgroundImage:"url("+options.src+")"
+                        }).animate({
+                            left: (i % options.gridCol) * (options.width / options.gridCol),
+                            top: Math.floor(i / options.gridCol) * (options.height / options.gridRow),
+                            width: options.width / options.gridCol,
+                            height: options.height / options.gridRow
+                        }, options.speed/2);
+                    });
+                });
+                setTimeout(function (){//执行动画淡入淡出
+                    effects.fade();
+                },options.speed/2);
+            },
+            Hanimate:function(){
+                stage[1].forEach(function(el,i){
+                    el.each(function(){
+                        var delay=options.speed/3*2 / options.gridHorizontal * (options.gridHorizontal - i);
+                        $(this).css({
+                            height:0,
+                            top:0,
+                            opacity:0,
+                            backgroundImage:"url("+options.src+")"
+
+                        }).delay(delay).animate({
+                            height:options.height / options.gridHorizontal,
+                            opacity:1,
+                            top:Math.floor(i * options.height / options.gridHorizontal)
+                        },options.speed/3);
+                    });
+                });
+                setTimeout(function(){
+                    effects.fade();
+                },options.speed/2);
+             },
+             Vanimate:function(){
+                 stage[2].forEach(function(el,i){
+                     el.each(function(){
+                         var delay=options.speed/3*2/options.gridVertical*(options.gridVertical-i);
+                         $(this).css({
+                             height:options.height,
+                             width:0,
+                             opacity:0,
+                             backgroundImage:"url("+options.src+")"
+                         }).delay(delay).animate({
+                             opacity:1,
+                             height:options.height,
+                             width:options.width/options.gridVertical,
+                             left:Math.floor(i * (options.width / options.gridVertical))
+
+                         },options.speed/3);
+                     });
+                 });
+                 setTimeout(function(){
+                     effects.fade();
+                 },options.speed/2)
+
+             }
+        };
+        //循环计时器循环调用动画执行
+        setInterval(function(){
+            options.elment.children("img").each(function(){
+                if($(this).css("zIndex")==4){
+                    options.src=$(this).attr("src")
+                }
+            });
+            effects.fade();
+            $(".par").html("");//间隔两秒清空一次
+        /*  if(var num=0;num<stage.length;num++){
+                stage[num].forEach(function(el){//随机切换动画
+                    $(".par").append(el)
+                });
+                effects[options.effects[num]]();
+          }*/
+            var num=Math.floor(Math.random()*stage.length);
+            stage[num].forEach(function(el){//随机切换动画
+            $(".par").append(el)
+            });
+            effects[options.effects[num]]();//调用三个动画
+        },options.speed)
+
+    })
+</script>
+</body>
+</html>
